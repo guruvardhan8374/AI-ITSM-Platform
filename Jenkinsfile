@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-@'
-=======
->>>>>>> 09eba65 (Add Docker deployment and Jenkins CI/CD)
-pipeline {
+﻿pipeline {
     agent any
 
     environment {
@@ -20,9 +16,7 @@ pipeline {
         stage('Backend Validation') {
             steps {
                 dir('backend') {
-                    powershell '''
-                        python -m compileall app
-                    '''
+                    sh 'python3 -m compileall app'
                 }
             }
         }
@@ -30,58 +24,53 @@ pipeline {
         stage('Frontend Build') {
             steps {
                 dir('frontend') {
-                    powershell '''
-                        npm ci
-                        npm run build
-                    '''
+                    sh 'npm ci'
+                    sh 'npm run build'
                 }
             }
         }
 
         stage('Docker Compose Validation') {
             steps {
-                powershell '''
-                    docker compose config
-                '''
+                sh 'docker compose config'
             }
         }
 
         stage('Build Docker Images') {
             steps {
-                powershell '''
-                    docker compose build
-                '''
+                sh 'docker compose build'
             }
         }
 
         stage('Deploy ITSM') {
             steps {
-                powershell '''
-                    docker compose up -d
-                '''
+                sh 'docker compose up -d'
             }
         }
 
         stage('Health Check') {
             steps {
-                powershell '''
-                    Start-Sleep -Seconds 15
+                sh '''
+                    echo "Waiting for services..."
+                    sleep 15
 
-                    $backend = docker inspect itsm_backend --format "{{.State.Health.Status}}"
-                    Write-Host "Backend health: $backend"
+                    BACKEND=$(docker inspect itsm_backend --format "{{.State.Health.Status}}")
+                    echo "Backend health: $BACKEND"
 
-                    if ($backend -ne "healthy") {
+                    if [ "$BACKEND" != "healthy" ]; then
                         docker logs itsm_backend --tail 50
                         exit 1
-                    }
+                    fi
 
-                    $frontend = docker inspect itsm_frontend --format "{{.State.Health.Status}}"
-                    Write-Host "Frontend health: $frontend"
+                    FRONTEND=$(docker inspect itsm_frontend --format "{{.State.Health.Status}}")
+                    echo "Frontend health: $FRONTEND"
 
-                    if ($frontend -ne "healthy") {
+                    if [ "$FRONTEND" != "healthy" ]; then
                         docker logs itsm_frontend --tail 50
                         exit 1
-                    }
+                    fi
+
+                    echo "All ITSM services are healthy."
                 '''
             }
         }
@@ -97,14 +86,7 @@ pipeline {
         }
 
         always {
-            powershell '''
-                docker ps
-            '''
+            sh 'docker ps'
         }
     }
-<<<<<<< HEAD
 }
-'@ | Set-Content -Path .\Jenkinsfile -Encoding UTF8
-=======
-}
->>>>>>> 09eba65 (Add Docker deployment and Jenkins CI/CD)
