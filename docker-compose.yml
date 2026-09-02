@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -18,19 +16,73 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 5s
 
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: itsm_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@itsm.local
-      PGADMIN_DEFAULT_PASSWORD: admin_password_123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin_password_123}
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5050}:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: itsm_backend
+    restart: always
+    environment:
+      - USE_SQLITE=false
+      - POSTGRES_SERVER=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-itsm_admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-itsm_password_123}
+      - POSTGRES_DB=${POSTGRES_DB:-itsm_db}
+      - SECRET_KEY=${SECRET_KEY:-super_secret_jwt_key_itsm_platform_2026}
+      - AI_PROVIDER=${AI_PROVIDER:-mock}
+    ports:
+      - "${BACKEND_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${FRONTEND_API_URL:-http://localhost:8001/api/v1}
+    container_name: itsm_frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-3001}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  default:
+    name: ai-itsm-platform_default
+    driver: bridge
