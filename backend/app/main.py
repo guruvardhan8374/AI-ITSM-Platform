@@ -11,6 +11,14 @@ async def lifespan(app: FastAPI):
     # Startup: Create tables if they don't exist
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    
+    # Auto-seed demo data if database is brand new / empty
+    try:
+        from app.database.seed_data import auto_seed_if_empty
+        await auto_seed_if_empty()
+    except Exception as e:
+        print(f"[STARTUP] Seed check notice: {e}")
+
     yield
     # Shutdown
     await engine.dispose()

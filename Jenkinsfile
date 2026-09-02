@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 @'
+=======
+>>>>>>> 09eba65 (Add Docker deployment and Jenkins CI/CD)
 pipeline {
     agent any
 
@@ -99,5 +102,9 @@ pipeline {
             '''
         }
     }
+<<<<<<< HEAD
 }
 '@ | Set-Content -Path .\Jenkinsfile -Encoding UTF8
+=======
+}
+>>>>>>> 09eba65 (Add Docker deployment and Jenkins CI/CD)

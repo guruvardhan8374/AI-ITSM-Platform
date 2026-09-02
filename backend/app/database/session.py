@@ -11,10 +11,12 @@ SQLITE_URL = f"sqlite+aiosqlite:///{SQLITE_DB_PATH.as_posix()}"
 
 use_sqlite_env = os.getenv("USE_SQLITE", "true").lower() == "true"
 
-if use_sqlite_env or not os.getenv("DATABASE_URL"):
-    db_url = SQLITE_URL
-else:
+if os.getenv("DATABASE_URL"):
+    db_url = os.getenv("DATABASE_URL")
+elif not use_sqlite_env:
     db_url = settings.DATABASE_URL
+else:
+    db_url = SQLITE_URL
 
 def get_engine(url: str):
     if "sqlite" in url:
