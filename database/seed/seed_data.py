@@ -98,11 +98,11 @@ async def seed():
         print("[SEED] Seeding Demo Users...")
         demo_password_hash = get_password_hash("Password123!")
         users_config = [
-            ("admin@itsm.local", "Super Admin User", "SUPER_ADMIN"),
-            ("manager@itsm.local", "IT Manager Sarah", "IT_MANAGER"),
-            ("agent@itsm.local", "Agent Alex Rivera", "SERVICE_DESK_AGENT"),
-            ("engineer@itsm.local", "Infra Engineer Marcus", "INFRASTRUCTURE_ENGINEER"),
-            ("user@itsm.local", "End User David", "END_USER")
+            ("admin@itsm.com", "Super Admin User", "SUPER_ADMIN"),
+            ("manager@itsm.com", "IT Manager Sarah", "IT_MANAGER"),
+            ("agent@itsm.com", "Agent Alex Rivera", "SERVICE_DESK_AGENT"),
+            ("engineer@itsm.com", "Infra Engineer Marcus", "INFRASTRUCTURE_ENGINEER"),
+            ("user@itsm.com", "End User David", "END_USER")
         ]
         user_map = {}
         for email, name, r_name in users_config:
@@ -143,7 +143,7 @@ async def seed():
                 serial_number=sn,
                 hostname=host,
                 ip_address=ip,
-                owner_id=user_map["engineer@itsm.local"].id,
+                owner_id=user_map["engineer@itsm.com"].id,
                 department_id=dept.id,
                 location=loc,
                 status=st,
@@ -177,9 +177,9 @@ async def seed():
                 category=base[3],
                 priority=base[2],
                 status=StatusEnum.IN_PROGRESS if i % 2 == 0 else StatusEnum.NEW,
-                reporter_id=user_map["user@itsm.local"].id,
+                reporter_id=user_map["user@itsm.com"].id,
                 assigned_team_id=team_map["Infrastructure Team"].id,
-                assigned_agent_id=user_map["engineer@itsm.local"].id,
+                assigned_agent_id=user_map["engineer@itsm.com"].id,
                 affected_asset_id=base[4],
                 sla_due_at=datetime.utcnow() + timedelta(hours=4)
             )
@@ -222,7 +222,7 @@ async def seed():
                 title=f"Service Request for {cat_objs[j % len(cat_objs)].name}",
                 description=f"User requested {cat_objs[j % len(cat_objs)].name} for project delivery requirements.",
                 service_id=cat_objs[j % len(cat_objs)].id,
-                requested_by_id=user_map["user@itsm.local"].id,
+                requested_by_id=user_map["user@itsm.com"].id,
                 assigned_team_id=team_map["Service Desk L1"].id,
                 priority=PriorityEnum.MEDIUM,
                 status=RequestStatusEnum.FULFILLMENT if j % 3 == 0 else RequestStatusEnum.APPROVAL_REQUIRED,
@@ -250,7 +250,7 @@ async def seed():
                 workaround="Restart service daemon and scale pool limit.",
                 permanent_fix="Apply index idx_created_at and upgrade firmware to v4.2.",
                 known_error=p_ke,
-                created_by_id=user_map["engineer@itsm.local"].id,
+                created_by_id=user_map["engineer@itsm.com"].id,
                 assigned_team_id=team_map["Database Administrators"].id
             )
             prb.incidents.extend(inc_objs[k*2:(k*2)+2])
@@ -269,7 +269,7 @@ async def seed():
                 root_cause="Configuration drift or exhausted connection pool.",
                 resolution="1. Check connection status.\n2. Execute restart daemon script.\n3. Verify health checks pass.",
                 content=f"## Standard Operating Procedure #{m+1}\n\nDetailed instructions for diagnosing and resolving issues in {kb_categories[m % len(kb_categories)]}.",
-                author_id=user_map["engineer@itsm.local"].id,
+                author_id=user_map["engineer@itsm.com"].id,
                 status="Published",
                 views=45 + m * 3,
                 helpful_count=12 + m
@@ -302,16 +302,16 @@ async def seed():
                 impact=1 if c_risk == "CRITICAL" else 2,
                 urgency=1 if c_type == "EMERGENCY" else 2,
                 affected_services="Core Infrastructure",
-                requested_by_id=user_map["engineer@itsm.local"].id,
+                requested_by_id=user_map["engineer@itsm.com"].id,
                 assigned_team_id=team_map["Infrastructure Team"].id,
-                assigned_engineer_id=user_map["engineer@itsm.local"].id,
+                assigned_engineer_id=user_map["engineer@itsm.com"].id,
                 implementation_plan="1. Notify NOC team.\n2. Take pre-change snapshot.\n3. Execute migration script.\n4. Verify synthetic checks.",
                 rollback_plan="1. Restore snapshot.\n2. Revert DNS CNAME to secondary standby.\n3. Notify stakeholders.",
                 validation_plan="Execute automated post-deployment API test suite.",
                 scheduled_start=datetime.utcnow() + timedelta(days=1),
                 scheduled_end=datetime.utcnow() + timedelta(days=1, hours=2),
                 approval_status=c_appr,
-                approver_id=user_map["manager@itsm.local"].id,
+                approver_id=user_map["manager@itsm.com"].id,
                 approval_decision_at=datetime.utcnow(),
                 approval_comments="Approved based on CAB review and risk assessment.",
                 status=c_st
@@ -404,7 +404,7 @@ async def seed():
         ]
         for idx, (title, msg, cat, prio, link) in enumerate(notif_items):
             n = Notification(
-                user_id=user_map["admin@itsm.local"].id,
+                user_id=user_map["admin@itsm.com"].id,
                 title=title,
                 message=msg,
                 category=cat,
@@ -417,16 +417,16 @@ async def seed():
 
         print("[SEED] Seeding 15 Audit Logs...")
         audit_events = [
-            ("LOGIN_SUCCESS", "Authentication", "User admin@itsm.local logged in successfully."),
+            ("LOGIN_SUCCESS", "Authentication", "User admin@itsm.com logged in successfully."),
             ("AUTOMATIC_INCIDENT_CREATED", "Infrastructure", "Automated P1 incident INC-1001 created on DB-01 CPU breach."),
             ("INCIDENT_ASSIGNED", "Incidents", "INC-1001 assigned to Infrastructure Team."),
             ("CHANGE_APPROVED", "Change Management", "Change CHG-1001 approved by IT Manager Sarah."),
             ("SLA_POLICY_UPDATED", "Governance", "Updated P1 Critical SLA targets."),
-            ("USER_CREATED", "Organization", "Created user account engineer@itsm.local.")
+            ("USER_CREATED", "Organization", "Created user account engineer@itsm.com.")
         ]
         for idx, (act, mod, det) in enumerate(audit_events):
             audit = AuditLog(
-                user_id=user_map["admin@itsm.local"].id,
+                user_id=user_map["admin@itsm.com"].id,
                 action=act,
                 module=mod,
                 details=det,

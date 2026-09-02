@@ -40,20 +40,20 @@ async def get_token_headers(client: AsyncClient, email: str) -> dict:
 
 @pytest_asyncio.fixture
 async def admin_headers(async_client: AsyncClient):
-    return await get_token_headers(async_client, "admin@itsm.local")
+    return await get_token_headers(async_client, "admin@itsm.com")
 
 @pytest_asyncio.fixture
 async def manager_headers(async_client: AsyncClient):
-    return await get_token_headers(async_client, "manager@itsm.local")
+    return await get_token_headers(async_client, "manager@itsm.com")
 
 @pytest_asyncio.fixture
 async def agent_headers(async_client: AsyncClient):
-    return await get_token_headers(async_client, "agent@itsm.local")
+    return await get_token_headers(async_client, "agent@itsm.com")
 
 @pytest_asyncio.fixture
 async def engineer_headers(async_client: AsyncClient):
-    return await get_token_headers(async_client, "engineer@itsm.local")
+    return await get_token_headers(async_client, "engineer@itsm.com")
 
 @pytest_asyncio.fixture
 async def user_headers(async_client: AsyncClient):
-    return await get_token_headers(async_client, "user@itsm.local")
+    return await get_token_headers(async_client, "user@itsm.com")

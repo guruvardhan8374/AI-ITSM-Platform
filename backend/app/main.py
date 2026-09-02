@@ -41,7 +41,8 @@ async def root():
     return {
         "message": "AI-Powered ITSM & Incident Resolution Platform API",
         "documentation": "/docs",
-        "health_check": f"{settings.API_V1_STR}/health"
+        "health_check": f"{settings.API_V1_STR}/health",
+        "status": "ready"
     }
 
 if __name__ == "__main__":

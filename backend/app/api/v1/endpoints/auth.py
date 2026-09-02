@@ -20,13 +20,18 @@ async def login(
 ):
     stmt = select(User).options(
         selectinload(User.role).selectinload(Role.permissions)
-    ).where(User.email == login_data.email)
+    ).where(User.email.ilike(login_data.email.strip()))
     result = await db.execute(stmt)
     user = result.scalars().first()
+    
+    if user:
+        is_valid = verify_password(login_data.password.strip(), user.hashed_password)
+    else:
+        is_valid = False
 
     client_ip = request.client.host if request.client else "unknown"
 
-    if not user or not verify_password(login_data.password, user.hashed_password):
+    if not user or not is_valid:
         # Audit failed login
         audit = AuditLog(
             user_id=user.id if user else None,

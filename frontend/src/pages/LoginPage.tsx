@@ -19,14 +19,16 @@ export const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    const cleanEmail = email.trim();
+    const cleanPassword = password.trim();
+    if (!cleanEmail || !cleanPassword) {
       setError('Please enter both email and password.');
       return;
     }
     setError(null);
     setIsSubmitting(true);
     try {
-      await login({ email, password });
+      await login({ email: cleanEmail, password: cleanPassword });
       navigate(from, { replace: true });
     } catch (err: any) {
       if (!err.response) {
@@ -48,10 +50,21 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const fillDemoAccount = (demoEmail: string) => {
+  const fillDemoAccount = async (demoEmail: string, autoSubmit = false) => {
     setEmail(demoEmail);
     setPassword('Password123!');
     setError(null);
+    if (autoSubmit) {
+      setIsSubmitting(true);
+      try {
+        await login({ email: demoEmail, password: 'Password123!' });
+        navigate(from, { replace: true });
+      } catch (err: any) {
+        setError(err?.response?.data?.detail || 'Authentication failed');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
   };
 
   return (
@@ -107,46 +120,46 @@ export const LoginPage: React.FC = () => {
             <div className="grid grid-cols-1 gap-1.5">
               <button
                 type="button"
-                onClick={() => fillDemoAccount('admin@itsm.local')}
+                onClick={() => fillDemoAccount('admin@itsm.com', true)}
                 className="text-left text-xs px-2.5 py-1.5 rounded bg-slate-800/60 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-300 transition-colors flex items-center justify-between border border-slate-700/60"
               >
-                <span>Super Admin (<code className="text-indigo-400">admin@itsm.local</code>)</span>
+                <span>Super Admin (<code className="text-indigo-400">admin@itsm.com</code>)</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
 
               <button
                 type="button"
-                onClick={() => fillDemoAccount('manager@itsm.local')}
+                onClick={() => fillDemoAccount('manager@itsm.com', true)}
                 className="text-left text-xs px-2.5 py-1.5 rounded bg-slate-800/60 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-300 transition-colors flex items-center justify-between border border-slate-700/60"
               >
-                <span>IT Manager (<code className="text-indigo-400">manager@itsm.local</code>)</span>
+                <span>IT Manager (<code className="text-indigo-400">manager@itsm.com</code>)</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
 
               <button
                 type="button"
-                onClick={() => fillDemoAccount('agent@itsm.local')}
+                onClick={() => fillDemoAccount('agent@itsm.com', true)}
                 className="text-left text-xs px-2.5 py-1.5 rounded bg-slate-800/60 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-300 transition-colors flex items-center justify-between border border-slate-700/60"
               >
-                <span>Service Desk Agent (<code className="text-indigo-400">agent@itsm.local</code>)</span>
+                <span>Service Desk Agent (<code className="text-indigo-400">agent@itsm.com</code>)</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
 
               <button
                 type="button"
-                onClick={() => fillDemoAccount('engineer@itsm.local')}
+                onClick={() => fillDemoAccount('engineer@itsm.com', true)}
                 className="text-left text-xs px-2.5 py-1.5 rounded bg-slate-800/60 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-300 transition-colors flex items-center justify-between border border-slate-700/60"
               >
-                <span>Infra Engineer (<code className="text-indigo-400">engineer@itsm.local</code>)</span>
+                <span>Infra Engineer (<code className="text-indigo-400">engineer@itsm.com</code>)</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
 
               <button
                 type="button"
-                onClick={() => fillDemoAccount('user@itsm.local')}
+                onClick={() => fillDemoAccount('user@itsm.com', true)}
                 className="text-left text-xs px-2.5 py-1.5 rounded bg-slate-800/60 hover:bg-indigo-600/20 text-slate-300 hover:text-indigo-300 transition-colors flex items-center justify-between border border-slate-700/60"
               >
-                <span>End User (<code className="text-indigo-400">user@itsm.local</code>)</span>
+                <span>End User (<code className="text-indigo-400">user@itsm.com</code>)</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -178,7 +191,7 @@ export const LoginPage: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@itsm.local"
+                  placeholder="admin@itsm.com"
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
